@@ -50,14 +50,14 @@
         self.motionManager = [[CMMotionManager alloc] init];
     }
 
-    if ([self.motionManager isGyroAvailable] == YES) {
+    if ([self.motionManager isDeviceMotionAvailable] == YES) {
         // Assign the update interval to the motion manager and start updates
-        [self.motionManager setGyroUpdateInterval:kAccelerometerInterval/1000];
+        [self.motionManager setDeviceMotionUpdateInterval:kAccelerometerInterval/1000];
         __weak CDVGyroscope* weakSelf = self;
-        [self.motionManager startGyroUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMGyroData *gyroData, NSError *error) {
-            weakSelf.x = gyroData.rotationRate.x;
-            weakSelf.y = gyroData.rotationRate.y;
-            weakSelf.z = gyroData.rotationRate.z;
+        [self.motionManager startDeviceMotionUpdatesToQueue:[NSOperationQueue mainQueue] withHandler:^(CMDeviceMotion *motionData, NSError *error) {
+            weakSelf.x = motionData.attitude.pitch;
+            weakSelf.y = motionData.attitude.roll;
+            weakSelf.z = motionData.attitude.yaw;
             weakSelf.timestamp = ([[NSDate date] timeIntervalSince1970] * 1000);
             [weakSelf returnGyroInfo];
         }];
@@ -82,12 +82,12 @@
 
 - (void)stop:(CDVInvokedUrlCommand*)command
 {
-    if ([self.motionManager isGyroAvailable] == YES) {
+    if ([self.motionManager isDeviceMotionAvailable] == YES) {
         if (self.haveReturnedResult == NO) {
             // block has not fired before stop was called, return whatever result we currently have
             [self returnGyroInfo];
         }
-        [self.motionManager stopGyroUpdates];
+        [self.motionManager stopDeviceMotionUpdates];
     }
     self.isRunning = NO;
 }
